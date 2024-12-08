@@ -1,7 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import uiUpdatesReducer from "./reducers/ui-updates-slice";
 
 const store = configureStore({
-  reducer: {},
+  reducer: {
+    uiUpdates: uiUpdatesReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
