@@ -1,12 +1,37 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ThemeToggle from "../../components/toggle/theme";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useAppDispatch } from "@/hooks/redux-hooks";
+import { setAuthUserType } from "@/redux/reducers/ui-updates-slice";
 
 type TopMenuProps = {
   isAuth?: boolean;
 };
+type UserType = "passenger" | "driver" | "admin";
 
 const TopMenu = ({ isAuth = true }: TopMenuProps) => {
+  const dispatch = useAppDispatch();
   const currentUrl = window.location.href;
+  const form = useForm<{ userType: UserType }>({
+    defaultValues: { userType: "passenger" },
+  });
+  const { watch, control } = form;
+  const selectedUserType = watch("userType");
+
+  useEffect(() => {
+    if (selectedUserType) {
+      dispatch(setAuthUserType({ authUserType: selectedUserType }));
+    }
+  }, [selectedUserType]);
 
   return (
     <header className="fixed top-0 bg-background/95 backdrop-blur w-full border-b border-b-[#292524] px-4 py-5 flex items-center justify-between">
@@ -18,6 +43,53 @@ const TopMenu = ({ isAuth = true }: TopMenuProps) => {
           >
             Home
           </a>
+          <div>
+            <Form {...form}>
+              <form>
+                <FormField
+                  name="userType"
+                  control={control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value: UserType) => {
+                          field.onChange(value);
+                          console.log("Selected user type:", value);
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select user type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="passenger">
+                            Passenger{" "}
+                            {currentUrl.includes("login")
+                              ? "login"
+                              : "register"}
+                          </SelectItem>
+                          <SelectItem value="driver">
+                            Driver{" "}
+                            {currentUrl.includes("login")
+                              ? "login"
+                              : "register"}
+                          </SelectItem>
+                          <SelectItem value="admin">
+                            Admin{" "}
+                            {currentUrl.includes("login")
+                              ? "login"
+                              : "register"}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
         </>
       ) : (
         <>
