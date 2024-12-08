@@ -5,6 +5,8 @@ import Login from "./modules/auth/login";
 import Register from "./modules/auth/register";
 import Profile from "./modules/client/dashboard/profile";
 import Search from "./modules/client/dashboard/search";
+import Ride from "./modules/client/dashboard/ride";
+import TrackBooking from "./modules/client/dashboard/track-booking";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -31,6 +33,14 @@ const App = () => {
         {
           path: "/client/search",
           element: <Search />,
+        },
+        {
+          path: "/client/ride/:id",
+          element: <Ride />,
+        },
+        {
+          path: "/track-booking",
+          element: <TrackBooking />,
         },
       ],
     },
