@@ -1,3 +1,4 @@
+import { loginUser } from "@/api/api-services/authentication-service";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,12 +18,59 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useForm } from "react-hook-form";
+import { useAppSelector } from "@/hooks/redux-hooks";
+import { useToast } from "@/hooks/use-toast";
+import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+
+interface LoginFormValues {
+  email: string;
+  password: string;
+  remember: boolean;
+}
 
 function Login() {
-  const form = useForm();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const userType = useAppSelector((state) => state.uiUpdates.authUserType);
+  const { toast } = useToast();
 
-  const onSubmit = () => {};
+  const form = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+  });
+
+  const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
+    setIsLoading(true);
+
+    if (!userType) {
+      return;
+    }
+
+    try {
+      const { email, password } = data;
+      const response = await loginUser(email, password, userType);
+      if (response) {
+        toast({
+          title: "Welcome back.",
+          description: response.message,
+        });
+        localStorage.setItem("isAuthenticated", "true");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: error.message,
+        variant: "destructive",
+      });
+      localStorage.setItem("isAuthenticated", "false");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -82,8 +130,15 @@ function Login() {
                   Forgot password?
                 </a>
               </div>
-              <Button type="submit" className="w-full">
-                Log in
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <LoaderCircle className="animate-spin text-xl" />
+                    Loging in
+                  </>
+                ) : (
+                  "Log in"
+                )}
               </Button>
             </form>
           </Form>
