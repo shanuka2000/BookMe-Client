@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormValues {
   email: string;
@@ -34,6 +35,7 @@ function Login() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const userType = useAppSelector((state) => state.uiUpdates.authUserType);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -54,11 +56,34 @@ function Login() {
       const { email, password } = data;
       const response = await loginUser(email, password, userType);
       if (response) {
-        toast({
-          title: "Welcome back.",
-          description: response.message,
-        });
         localStorage.setItem("isAuthenticated", "true");
+        if (userType === "passenger") {
+          toast({
+            title: `Welcome back ${response.data.firstName}.`,
+            description: response.message,
+          });
+          navigate("/client/search");
+        } else if (userType === "driver") {
+          toast({
+            title: `Welcome back ${response.data.firstName}.`,
+            description: response.message,
+          });
+          navigate("/driver/trips");
+        } else if (userType === "admin") {
+          toast({
+            title: `Welcome back ${response.data.firstName}.`,
+            description: response.message,
+          });
+          navigate("/admin/dashboard");
+        } else {
+          localStorage.setItem("isAuthenticated", "false");
+          toast({
+            title: "Uh oh! Something went wrong.",
+            description: "Seems Something went wrong from our end.",
+            variant: "destructive",
+          });
+          navigate("/login");
+        }
       }
     } catch (error: any) {
       toast({
