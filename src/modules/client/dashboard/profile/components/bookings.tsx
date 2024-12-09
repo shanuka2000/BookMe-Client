@@ -150,20 +150,13 @@ const Bookings = () => {
                       </div>
                       <div>
                         <Button
-                          onMouseEnter={() => setIsHovered(index.toString())}
-                          onMouseLeave={() => setIsHovered("")}
-                          className="transition-transform w-[130px]"
                           onClick={() =>
                             navigate(
                               `/track-booking?bookingId=${item._id}&tripId=${item.tripId}`
                             )
                           }
                         >
-                          {isHovered === index.toString() ? (
-                            <>View full details</>
-                          ) : (
-                            <>Rs.{item.bookingPrice}</>
-                          )}
+                          Track trip
                         </Button>
                       </div>
                     </div>
