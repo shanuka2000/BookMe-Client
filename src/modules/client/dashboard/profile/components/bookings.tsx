@@ -8,7 +8,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CircleAlert, Map, MoveRight } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import bus from "../../../../../assets/bus.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,64 +21,52 @@ import {
   TimelineItem,
   TimelineTitle,
 } from "@/components/timeline/timeline";
+import { useToast } from "@/hooks/use-toast";
+import { Booking, getBookings } from "@/api/api-services/booking-service";
+import { useNavigate } from "react-router-dom";
 
 const Bookings = () => {
-  const loading = false;
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [isHovered, setIsHovered] = useState("");
-  const data = {
-    oldBookings: [
-      {
-        passengers: {
-          gender: "Male",
-          firstName: "Shavindi",
-          lastName: "Nimsara",
-        },
-        seatReservation: {
-          totalSeats: 1,
-          seatConfiguration: [
-            {
-              seatNumber: 4,
-              seatType: "window",
-              seatFloor: "1",
-            },
-          ],
-          currency: "LKR",
-          totalSeatPrice: 1000,
-        },
-        cotact: {
-          email: "sample@mail.com",
-          countryCode: "+94",
-          phone: 111111111,
-        },
-        payment: {
-          paymentType: "card",
-          billingAddress: null,
-        },
-        tripSummary: {
-          from: "colombo",
-          to: "kandy",
-          dateFrom: "2024-11-16T10:43:36+00:00",
-          dateTo: "2024-11-16T10:43:36+00:00",
-          startTime: "10:00",
-          endTIme: "17:30",
-          tripType: "direct",
-          fromLocation:
-            "https://www.google.com/maps/place/Colombo+Central+Bus+Stand/@6.9349911,79.8515757,17z/data=!4m14!1m7!3m6!1s0x3ae253cc0b347a99:0xaa180c9eadb18cc6!2sBus+Stop!8m2!3d6.8635912!4d80.0253039!16s%2Fg%2F11hz8rz77f!3m5!1s0x3ae25918b19d5035:0x4de4d357145b9a92!8m2!3d6.9349908!4d79.8529545!16s%2Fg%2F11fmddjvmd?entry=ttu&g_ep=EgoyMDI0MTExMy4xIKXMDSoASAFQAw%3D%3D",
-          toLocation:
-            "https://www.google.com/maps/place/Kandy+Bus+Stand/@7.289825,80.6288988,17z/data=!4m14!1m7!3m6!1s0x3ae36970c5a5a31f:0xd6e19563d79cbf59!2sKandy+Bus+Stand!8m2!3d7.2898141!4d80.6310986!16s%2Fg%2F11n0cy823d!3m5!1s0x3ae36970c5a5a31f:0xd6e19563d79cbf59!8m2!3d7.2898141!4d80.6310986!16s%2Fg%2F11n0cy823d?entry=ttu&g_ep=EgoyMDI0MTExMy4xIKXMDSoASAFQAw%3D%3D",
-          currency: "LKR",
-          serviceFee: 200,
-          seatPrice: 1000,
-          totalFare: 1200,
-        },
-        tripFinalStatus: {
-          completionStatus: "completed",
-          tripStartTime: "10:00",
-          tripEndTime: "18:00",
-        },
-      },
-    ],
-  };
+  const navigate = useNavigate();
+
+  const [bookings, setBookings] = useState<Booking[]>();
+
+  useEffect(() => {
+    const fetchUserBookings = async () => {
+      try {
+        setLoading(true);
+        const id = user?.id;
+        if (!id) {
+          toast({
+            title: "Uh oh! Something went wrong.",
+            description: "Please refresh the page and try again!",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const response = await getBookings(id);
+        if (response && response.data.length > 0) {
+          setBookings(response.data);
+        } else {
+          setBookings([]);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserBookings();
+  }, []);
   return (
     <div className="space-y-5">
       {loading ? (
@@ -110,59 +98,52 @@ const Bookings = () => {
         </>
       ) : (
         <>
-          {data.oldBookings && data.oldBookings.length > 0 ? (
+          {bookings && bookings.length > 0 ? (
             <>
-              <ScrollArea className="h-72  rounded-md border [&>*]:p-3">
-                {data.oldBookings.map((item, index) => (
+              <ScrollArea className="h-72 rounded-md border [&>*]:p-3">
+                {bookings.map((item, index) => (
                   <React.Fragment key={index}>
                     <div className="hidden xl:flex items-center justify-between p-2 py-4">
                       <div className="flex items-start justify-start gap-x-3">
                         <Avatar>
                           <AvatarImage src={bus} />
-                          <AvatarFallback>
-                            {item.tripSummary.tripType[0].toUpperCase()}
-                          </AvatarFallback>
+                          <AvatarFallback>D</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col gap-y-1">
                           <div className="flex items-center gap-x-2">
                             <div className="flex items-center gap-x-1 text-sm">
-                              <p className="flex items-center gap-x-1">
-                                From: {item.tripSummary.from}{" "}
+                              <p className="flex items-center gap-x-1 line-clamp-1">
+                                From: {item.bookingFrom.displayName}{" "}
                                 <a
                                   target="_blank"
-                                  href={item.tripSummary.fromLocation}
+                                  href={item.bookingFrom.locationUrl}
                                 >
                                   <Map size={15} />
                                 </a>
                               </p>
                               <MoveRight size={15} />
-                              <p className="flex items-center gap-x-1">
-                                To: {item.tripSummary.to}
+                              <p className="flex items-center gap-x-1 line-clamp-1">
+                                To: {item.bookingTo.displayName}
                                 <a
                                   target="_blank"
-                                  href={item.tripSummary.toLocation}
+                                  href={item.bookingTo.locationUrl}
                                 >
                                   <Map size={15} />
                                 </a>
                               </p>
                             </div>
-                            <Badge>
-                              {item.tripFinalStatus.completionStatus}
-                            </Badge>
+                            <Badge>{item.bookingStatus}</Badge>
                           </div>
                           <div className="flex items-center gap-x-1">
                             <p className="text-sm">
                               Trip booked by{" "}
                               <b>
-                                {item.passengers.firstName +
+                                {item.bookedBy.firstName +
                                   " " +
-                                  item.passengers.lastName}
+                                  item.bookedBy.lastName}
                               </b>{" "}
-                              and booked a total of{" "}
-                              <b>{item.seatReservation.totalSeats} </b>
-                              {item.seatReservation.totalSeats === 1
-                                ? "seat."
-                                : "seats."}
+                              and booked a total of <b>{item.seats} </b>
+                              {item.seats === 1 ? "seat." : "seats."}
                             </p>
                           </div>
                         </div>
@@ -172,33 +153,30 @@ const Bookings = () => {
                           onMouseEnter={() => setIsHovered(index.toString())}
                           onMouseLeave={() => setIsHovered("")}
                           className="transition-transform w-[130px]"
+                          onClick={() =>
+                            navigate(
+                              `/track-booking?bookingId=${item._id}&tripId=${item.tripId}`
+                            )
+                          }
                         >
                           {isHovered === index.toString() ? (
                             <>View full details</>
                           ) : (
-                            <>Rs.{item.tripSummary.totalFare}</>
+                            <>Rs.{item.bookingPrice}</>
                           )}
                         </Button>
                       </div>
                     </div>
-                    <div className="xl:hidden">
+                    <div className="xl:hidden my-3">
                       <div className="px-6 pb-3 flex items-center gap-x-2">
-                        {item.tripFinalStatus.completionStatus && (
-                          <Badge>
-                            Trip {item.tripFinalStatus.completionStatus}
+                        {item.bookingStatus && (
+                          <Badge className="text-xs">
+                            Status: {item.bookingStatus}
                           </Badge>
                         )}
-                        {item.passengers.firstName && (
-                          <Badge>
-                            By{" "}
-                            {item.passengers.firstName +
-                              " " +
-                              item.passengers.lastName}
-                          </Badge>
-                        )}
-                        {item.seatReservation.totalSeats && (
-                          <Badge>
-                            Total seats {item.seatReservation.totalSeats}
+                        {item.seats && (
+                          <Badge className="text-xs">
+                            No seats: {item.seats}
                           </Badge>
                         )}
                       </div>
@@ -210,10 +188,12 @@ const Bookings = () => {
                               <TimelineHeader>
                                 <TimelineIcon />
                                 <TimelineTitle className="flex items-center gap-x-1">
-                                  {item.tripSummary.from}
+                                  <span className="line-clamp-1 text-xs">
+                                    {item.bookingFrom.displayName}
+                                  </span>
                                   <a
                                     target="_blank"
-                                    href={item.tripSummary.fromLocation}
+                                    href={item.bookingFrom.locationUrl}
                                   >
                                     <Map size={15} />
                                   </a>
@@ -224,10 +204,12 @@ const Bookings = () => {
                               <TimelineHeader>
                                 <TimelineIcon />
                                 <TimelineTitle className="flex items-center gap-x-1">
-                                  {item.tripSummary.to}
+                                  <span className="line-clamp-1 text-xs">
+                                    {item.bookingTo.displayName}
+                                  </span>
                                   <a
                                     target="_blank"
-                                    href={item.tripSummary.toLocation}
+                                    href={item.bookingTo.locationUrl}
                                   >
                                     <Map size={15} />
                                   </a>
@@ -240,12 +222,22 @@ const Bookings = () => {
                           <Button
                             onMouseEnter={() => setIsHovered(index.toString())}
                             onMouseLeave={() => setIsHovered("")}
-                            className="transition-transform w-[130px]"
+                            className="transition-transform w-[90px] text-xs"
+                            onClick={() =>
+                              navigate(
+                                `/track-booking?bookingId=${item._id}&tripId=${item.tripId}`
+                              )
+                            }
+                            disabled={
+                              item.bookingStatus === "completed" ||
+                              item.bookingStatus === "cancelled" ||
+                              item.bookingStatus === "abandoned"
+                            }
                           >
                             {isHovered === index.toString() ? (
-                              <>View full details</>
+                              <>Track</>
                             ) : (
-                              <>Rs.{item.tripSummary.totalFare}</>
+                              <>Rs.{item.bookingPrice}</>
                             )}
                           </Button>
                         </div>
