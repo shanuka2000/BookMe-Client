@@ -2,6 +2,16 @@ import axiosInstance from "../axios-instance";
 import { Bus } from "./bus-service";
 import { Location } from "./location-service";
 
+export type TripStops = {
+  _id: string;
+  stopId: number;
+  isArrived: boolean;
+  tripId: string;
+  stopLocation: Location;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type Trip = {
   _id: string;
   startLocation: Location;
@@ -12,7 +22,7 @@ export type Trip = {
   endTime: string;
   distance: string;
   duration: string;
-  stops: Location[];
+  stops: TripStops[];
   busId: Bus;
   driver: string;
   status: "not_started" | "on_going" | "completed";
