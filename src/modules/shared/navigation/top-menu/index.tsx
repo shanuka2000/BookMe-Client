@@ -12,13 +12,14 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setAuthUserType } from "@/redux/reducers/ui-updates-slice";
+import { Button } from "@/components/ui/button";
 
 type TopMenuProps = {
-  isAuth?: boolean;
+  isAuth?: string;
 };
 type UserType = "passenger" | "driver" | "admin";
 
-const TopMenu = ({ isAuth = true }: TopMenuProps) => {
+const TopMenu = ({ isAuth = "false" }: TopMenuProps) => {
   const dispatch = useAppDispatch();
   const currentUrl = window.location.href;
   const form = useForm<{ userType: UserType }>({
@@ -93,19 +94,26 @@ const TopMenu = ({ isAuth = true }: TopMenuProps) => {
         </>
       ) : (
         <>
-          <div>
+          <div className="flex space-x-3">
             <a href="/" className="flex text-lg font-medium gap-x-1">
               BookME <span>{currentUrl.includes("client") && "Passenger"}</span>
               <span>{currentUrl.includes("admin") && "Admin"}</span>
               <span>{currentUrl.includes("driver") && "Driver"}</span>
             </a>
+            {currentUrl.includes("client") && (
+              <>
+                <a href="/track-booking">
+                  <Button variant="outline">Track trip</Button>
+                </a>
+              </>
+            )}
           </div>
           <div
             className={`flex ${
               isAuth ? "flex-row-reverse gap-x-5" : "space-x-2"
             } items-center`}
           >
-            {isAuth ? (
+            {isAuth === "true" ? (
               <>
                 <a href="/client/profile">
                   <Avatar>
