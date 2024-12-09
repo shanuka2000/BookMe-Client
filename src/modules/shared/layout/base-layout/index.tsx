@@ -9,7 +9,6 @@ const BaseLayout = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isAuthenticated = localStorage.getItem("isAuthenticated");
-
   useEffect(() => {
     const getProfile = async () => {
       setIsLoading(true);
@@ -22,11 +21,15 @@ const BaseLayout = () => {
             description: response.message,
           });
           localStorage.setItem("user", JSON.stringify(response.data));
-          setTimeout(() => {
-            if (response.data.role === "passenger") {
-              navigate("/client/search");
-            }
-          });
+          // setTimeout(() => {
+          //   if (response.data.role === "passenger") {
+          //     navigate("/client/search");
+          //   } else if (response.data.role === "driver") {
+          //     navigate("/driver/dashboard");
+          //   } else {
+          //     navigate("/admin/dashboard");
+          //   }
+          // });
         }
       } catch (error: any) {
         toast({
@@ -34,16 +37,17 @@ const BaseLayout = () => {
           description: error.message,
           variant: "destructive",
         });
+        navigate("/login");
       } finally {
         setIsLoading(false);
       }
     };
     getProfile();
-  }, [isAuthenticated === "true"]);
+  }, []);
   return (
     <div className="flex w-full">
       <div className="w-full h-full flex flex-col">
-        <TopMenu />
+        <TopMenu isAuth={isAuthenticated} />
         <main className="flex-1 bg-background">
           <Outlet />
         </main>
