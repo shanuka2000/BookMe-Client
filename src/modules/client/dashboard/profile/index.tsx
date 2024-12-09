@@ -43,7 +43,7 @@ const Profile = () => {
   const [isActive, setIsActive] = useState("personalDetails");
 
   return (
-    <div className="pt-24 w-full md:w-[70%] flex px-4">
+    <div className="pt-24 w-full md:w-[80%] flex px-4">
       <div className="flex h-fit flex-col border w-[15%] md:w-[30%] rounded-lg">
         {data.nav.map((item, index) => (
           <React.Fragment key={index}>
