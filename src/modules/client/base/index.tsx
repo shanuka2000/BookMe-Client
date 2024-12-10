@@ -1,3 +1,7 @@
+import {
+  Location,
+  retriveAllLocations,
+} from "@/api/api-services/location-service";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -8,6 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,22 +28,72 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Popover } from "@radix-ui/react-popover";
 import { format } from "date-fns";
 import {
   CalendarIcon,
+  Check,
   MapPinCheck,
   ShieldCheck,
   Ticket,
   Zap,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+
+interface SearchFormValues {
+  from: string;
+  to: string;
+  depature: Date | null;
+  noPassengers: number;
+}
 
 const Welcome = () => {
-  const form = useForm();
+  const [, setIsLocationLoading] = useState<boolean>(false);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const navigate = useNavigate();
+  const form = useForm<SearchFormValues>({
+    defaultValues: {
+      from: "",
+      to: "",
+      depature: null,
+      noPassengers: 1,
+    },
+  });
 
-  const onSubmit = () => {};
+  useEffect(() => {
+    const getLocations = async () => {
+      setIsLocationLoading(true);
+
+      try {
+        const response = await retriveAllLocations();
+        if (response.data && response.data.length > 0) {
+          setLocations(response.data);
+        } else {
+          setLocations([]);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLocationLoading(false);
+      }
+    };
+
+    getLocations();
+  }, []);
+
+  const onSubmit = async (data: SearchFormValues) => {
+    navigate(
+      `/client/search?from=${data.from}&to=${data.to}&depature=${data.depature}&noPassengers=${data.noPassengers}`
+    );
+  };
 
   return (
     <div className="mt-24">
@@ -44,23 +106,67 @@ const Welcome = () => {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex flex-col items-start w-full max-md:space-y-3 md:flex-row md:items-center md:justify-center md:space-x-5 "
+                className="flex flex-col items-start w-full max-md:space-y-3 md:flex-row md:items-center md:justify-center md:space-x-5"
               >
                 <div className="flex flex-col w-full max-md:space-y-3 md:flex-row md:items-center md:space-x-2">
                   <FormField
                     control={form.control}
                     name="from"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col mt-2">
                         <FormLabel>From</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="md:w-[240px]"
-                            type="text"
-                            placeholder="Colombo"
-                            {...field}
-                          />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "md:w-[240px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? locations.find(
+                                      (location) => location._id === field.value
+                                    )?.displayName
+                                  : "Colombo"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="md:w-[240px] p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search location..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>No location found.</CommandEmpty>
+                                <CommandGroup>
+                                  {locations.map((location) => (
+                                    <CommandItem
+                                      value={location.displayName}
+                                      key={location._id}
+                                      onSelect={() => {
+                                        form.setValue("from", location._id);
+                                      }}
+                                    >
+                                      {location.displayName}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          location._id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </FormItem>
                     )}
                   />
@@ -68,16 +174,61 @@ const Welcome = () => {
                     control={form.control}
                     name="to"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col mt-2">
                         <FormLabel>To</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="md:w-[240px]"
-                            type="text"
-                            placeholder="Kandy"
-                            {...field}
-                          />
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "md:w-[240px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? locations.find(
+                                      (location) => location._id === field.value
+                                    )?.displayName
+                                  : "Kandy"}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="md:w-[240px] p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search location..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>No location found.</CommandEmpty>
+                                <CommandGroup>
+                                  {locations.map((location) => (
+                                    <CommandItem
+                                      value={location.displayName}
+                                      key={location._id}
+                                      onSelect={() => {
+                                        form.setValue("to", location._id);
+                                      }}
+                                      className=""
+                                    >
+                                      {location.displayName}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          location._id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </FormItem>
                     )}
                   />
@@ -100,7 +251,7 @@ const Welcome = () => {
                                 )}
                               >
                                 {field.value ? (
-                                  format(field.value, "PPP")
+                                  format(new Date(field.value), "yyyy-MM-dd")
                                 ) : (
                                   <span>Pick a date</span>
                                 )}
@@ -111,12 +262,15 @@ const Welcome = () => {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() ||
-                                date < new Date("1900-01-01")
+                              selected={
+                                field.value ? new Date(field.value) : undefined
                               }
+                              onSelect={(date) => {
+                                if (date) {
+                                  field.onChange(format(date, "yyyy-MM-dd"));
+                                }
+                              }}
+                              // disabled={(date) => date <= new Date()}
                               initialFocus
                             />
                           </PopoverContent>
@@ -149,11 +303,9 @@ const Welcome = () => {
                 <div className="flex mt-2">
                   <FormItem className="flex flex-col">
                     <FormLabel className="opacity-0">Passengers</FormLabel>
-                    <a href="/client/search">
-                      <Button type="button" className="w-[150px]">
-                        Search
-                      </Button>
-                    </a>
+                    <Button type="submit" className="w-[150px]">
+                      Search
+                    </Button>
                   </FormItem>
                 </div>
               </form>
