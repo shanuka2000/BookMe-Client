@@ -9,6 +9,7 @@ import Ride from "./modules/client/dashboard/ride";
 import TrackBooking from "./modules/client/dashboard/track-booking";
 import DriverWelcome from "./modules/driver/base";
 import Logout from "./modules/auth/logout";
+import DriverTrip from "./modules/driver/dashboard/trip";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -51,6 +52,10 @@ const App = () => {
         {
           path: "/driver/dashboard",
           element: <DriverWelcome />,
+        },
+        {
+          path: "/driver/trip",
+          element: <DriverTrip />,
         },
       ],
     },

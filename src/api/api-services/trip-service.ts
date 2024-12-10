@@ -1,13 +1,13 @@
 import axiosInstance from "../axios-instance";
 import { Bus } from "./bus-service";
 import { Location } from "./location-service";
+import { TripStops } from "./trip-stops-service";
 
-export type TripStops = {
+export type Driver = {
   _id: string;
-  stopId: number;
-  isArrived: boolean;
-  tripId: string;
-  stopLocation: Location;
+  firstName: string;
+  lastName: string;
+  email: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -24,7 +24,7 @@ export type Trip = {
   duration: string;
   stops: TripStops[];
   busId: Bus;
-  driver: string;
+  driver: Driver;
   status: "not_started" | "on_going" | "completed";
   tripCreationStatus: "0" | "1" | "2" | "3";
   createdAt: Date;
@@ -40,6 +40,10 @@ interface AllTripResponse {
 interface SingleTripResponse {
   message: string;
   data: Trip;
+}
+
+interface PatchStatsResponse {
+  message: string;
 }
 
 const basePath = "/trip";
@@ -90,6 +94,50 @@ export const retriveSingleTrip = async (
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data.message || "Failed to retrive Trip.");
+    } else if (error.request) {
+      throw new Error("Network error. Please try again later.");
+    } else {
+      throw new Error("An unexpected error occurred.");
+    }
+  }
+};
+
+export const retriveTripByDriverId = async (
+  id: string
+): Promise<AllTripResponse> => {
+  try {
+    const response = await axiosInstance.get<AllTripResponse>(
+      `${basePath}/byDriver/${id}`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        error.response.data.message || "Failed to retrive trips for driver."
+      );
+    } else if (error.request) {
+      throw new Error("Network error. Please try again later.");
+    } else {
+      throw new Error("An unexpected error occurred.");
+    }
+  }
+};
+
+export const updateTripStatus = async (
+  id: string,
+  status: "not_started" | "on_going" | "completed"
+): Promise<PatchStatsResponse> => {
+  try {
+    const response = await axiosInstance.patch<PatchStatsResponse>(
+      `${basePath}/status/${id}`,
+      { status }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(
+        error.response.data.message || "Failed to update trip status."
+      );
     } else if (error.request) {
       throw new Error("Network error. Please try again later.");
     } else {
