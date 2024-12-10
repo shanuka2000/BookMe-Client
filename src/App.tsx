@@ -7,6 +7,7 @@ import Profile from "./modules/client/dashboard/profile";
 import Search from "./modules/client/dashboard/search";
 import Ride from "./modules/client/dashboard/ride";
 import TrackBooking from "./modules/client/dashboard/track-booking";
+import DriverWelcome from "./modules/driver/base";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -41,6 +42,10 @@ const App = () => {
         {
           path: "/track-booking",
           element: <TrackBooking />,
+        },
+        {
+          path: "/driver/dashboard",
+          element: <DriverWelcome />,
         },
       ],
     },
