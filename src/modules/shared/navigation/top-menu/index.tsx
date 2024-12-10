@@ -14,12 +14,12 @@ import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setAuthUserType } from "@/redux/reducers/ui-updates-slice";
 import { Button } from "@/components/ui/button";
 
-type TopMenuProps = {
-  isAuth?: string;
-};
 type UserType = "passenger" | "driver" | "admin";
 
-const TopMenu = ({ isAuth = "false" }: TopMenuProps) => {
+const TopMenu = () => {
+  const isAuthenticated = JSON.parse(
+    localStorage.getItem("isAuthenticated") || "false"
+  );
   const dispatch = useAppDispatch();
   const currentUrl = window.location.href;
   const form = useForm<{ userType: UserType }>({
@@ -110,10 +110,10 @@ const TopMenu = ({ isAuth = "false" }: TopMenuProps) => {
           </div>
           <div
             className={`flex ${
-              isAuth ? "flex-row-reverse gap-x-5" : "space-x-2"
+              isAuthenticated ? "flex-row-reverse gap-x-5" : "space-x-2"
             } items-center`}
           >
-            {isAuth === "true" ? (
+            {isAuthenticated ? (
               <>
                 <a href="/client/profile">
                   <Avatar>

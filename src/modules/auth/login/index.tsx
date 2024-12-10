@@ -1,4 +1,7 @@
-import { loginUser } from "@/api/api-services/authentication-service";
+import {
+  loginUser,
+  retriveUserProfile,
+} from "@/api/api-services/authentication-service";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -56,33 +59,36 @@ function Login() {
       const { email, password } = data;
       const response = await loginUser(email, password, userType);
       if (response) {
-        localStorage.setItem("isAuthenticated", "true");
-        if (userType === "passenger") {
-          toast({
-            title: `Welcome back ${response.data.firstName}.`,
-            description: response.message,
-          });
-          navigate("/client/search");
-        } else if (userType === "driver") {
-          toast({
-            title: `Welcome back ${response.data.firstName}.`,
-            description: response.message,
-          });
-          navigate("/driver/trips");
-        } else if (userType === "admin") {
-          toast({
-            title: `Welcome back ${response.data.firstName}.`,
-            description: response.message,
-          });
-          navigate("/admin/dashboard");
-        } else {
-          localStorage.setItem("isAuthenticated", "false");
-          toast({
-            title: "Uh oh! Something went wrong.",
-            description: "Seems Something went wrong from our end.",
-            variant: "destructive",
-          });
-          navigate("/login");
+        const profile = await retriveUserProfile();
+        if (profile) {
+          localStorage.setItem("isAuthenticated", "true");
+          localStorage.setItem("user", JSON.stringify(profile.data));
+          if (profile.data.role === "passenger") {
+            toast({
+              title: `Welcome back ${response.data.firstName}.`,
+              description: response.message,
+            });
+            navigate("/client/search");
+          } else if (profile.data.role === "driver") {
+            toast({
+              title: `Welcome back ${response.data.firstName}.`,
+              description: response.message,
+            });
+            navigate("/driver/dashboard");
+          } else if (profile.data.role === "admin") {
+            toast({
+              title: `Welcome back ${response.data.firstName}.`,
+              description: response.message,
+            });
+            navigate("/driver/dashboard");
+          } else {
+            toast({
+              title: "Uh oh! Something went wrong.",
+              description: "An unexpected error occurred. Please try again.",
+              variant: "destructive",
+            });
+            navigate("/login");
+          }
         }
       }
     } catch (error: any) {
