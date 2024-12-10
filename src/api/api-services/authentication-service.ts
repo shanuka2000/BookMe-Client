@@ -30,6 +30,10 @@ interface ProfileResponse {
   };
 }
 
+interface LogoutResponse {
+  message: string;
+}
+
 const basePath = "/auth";
 
 export const retriveUserProfile = async (): Promise<ProfileResponse> => {
@@ -75,6 +79,33 @@ export const loginUser = async (
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data.message || "Login failed");
+    } else if (error.request) {
+      throw new Error("Network error. Please try again later.");
+    } else {
+      throw new Error("An unexpected error occurred.");
+    }
+  }
+};
+
+export const logoutUser = async (
+  role: "passenger" | "driver" | "admin"
+): Promise<LogoutResponse> => {
+  try {
+    let endpoint: string = "";
+    if (role === "passenger") endpoint = "/user/logout";
+    else if (role === "driver") endpoint = "/driver/logout";
+    else if (role === "admin") endpoint = "/admin/logout";
+    else {
+      throw new Error("Invalid user login attempt.");
+    }
+
+    const response = await axiosInstance.post<LogoutResponse>(
+      `${basePath}${endpoint}`
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(error.response.data.message || "Logout failed");
     } else if (error.request) {
       throw new Error("Network error. Please try again later.");
     } else {

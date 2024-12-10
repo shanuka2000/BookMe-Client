@@ -13,13 +13,20 @@ import { useEffect } from "react";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { setAuthUserType } from "@/redux/reducers/ui-updates-slice";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Menu } from "lucide-react";
 
 type UserType = "passenger" | "driver" | "admin";
 
-const TopMenu = () => {
-  const isAuthenticated = JSON.parse(
-    localStorage.getItem("isAuthenticated") || "false"
-  );
+type TopMenuProps = {
+  isAuth: boolean;
+};
+
+const TopMenu = ({ isAuth }: TopMenuProps) => {
   const dispatch = useAppDispatch();
   const currentUrl = window.location.href;
   const form = useForm<{ userType: UserType }>({
@@ -110,17 +117,51 @@ const TopMenu = () => {
           </div>
           <div
             className={`flex ${
-              isAuthenticated ? "flex-row-reverse gap-x-5" : "space-x-2"
+              isAuth ? "flex-row-reverse gap-x-5" : "space-x-2"
             } items-center`}
           >
-            {isAuthenticated ? (
+            {isAuth ? (
               <>
-                <a href="/client/profile">
-                  <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </a>
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    className="hidden md:flex hover:cursor-pointer"
+                  >
+                    <div>
+                      <Avatar>
+                        <AvatarImage src="https://github.com/shadcn.png" />
+                        <AvatarFallback>CN</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-40 max-md:mt-3 space-y-3 flex flex-col">
+                    <a href="/client/profile" className="w-full">
+                      <span className="w-full">Profile</span>
+                    </a>
+                    <a href="/logout" className="w-full">
+                      <span className="w-full">Logout</span>
+                    </a>
+                  </PopoverContent>
+                </Popover>
+
+                <Popover>
+                  <PopoverTrigger
+                    asChild
+                    className="md:hidden hover:cursor-pointer"
+                  >
+                    <div className="md:hidden">
+                      <Menu />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-40 max-md:mt-3  space-y-3">
+                    <div>
+                      <a href="/client/profile">Profile</a>
+                    </div>
+                    <div>
+                      <a href="/logout">Logout</a>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </>
             ) : (
               <>
