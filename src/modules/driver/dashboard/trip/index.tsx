@@ -45,11 +45,9 @@ const DriverTrip = () => {
     actionId: string,
     previousAction: "not_started" | "on_going" | "completed"
   ) => {
-    console.log("Inside method");
     try {
       setPatchLoading(true);
       if (previousAction === "not_started" || previousAction === "on_going") {
-        console.log("Inside try");
         if (!action || !actionId) {
           toast({
             title: "Uh oh! Something went wrong.",
@@ -143,207 +141,213 @@ const DriverTrip = () => {
 
   return (
     <div className="mt-24 flex flex-col p-1 space-y-5 items-center justify-center">
-      {trip ? (
-        <Card className="w-[90%] md:w-[40%] p-1">
-          <CardHeader className="gap-y-1">
-            <CardTitle>
-              Search result for trip id{" "}
-              <span className="text-primary">{trip._id}</span>
-            </CardTitle>
-            <CardDescription>
-              Below timeline shows the exact location of the bus you booked
-              right now.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Timeline>
-              <TimelineItem>
-                <TimelineConnector />
-                <TimelineHeader>
-                  <TimelineIcon />
-                  <TimelineTitle>
-                    {trip.startLocation.displayName}
-                  </TimelineTitle>
-                  <TimelineDescription>
-                    {trip.status === "on_going" && (
-                      <Button className="text-xs" disabled variant="outline">
-                        Completed
-                      </Button>
-                    )}
-                    {trip.status === "not_started" && (
-                      <Button
-                        className="text-xs"
-                        variant="default"
-                        onClick={() => {
-                          updatedTripStatus("on_going", trip._id, trip.status);
-                        }}
-                      >
-                        {patchLoading && trip._id === actionId ? (
-                          <>
-                            <LoaderCircle className="animate-spin text-xl" />
-                          </>
-                        ) : (
-                          <>Start trip</>
-                        )}
-                      </Button>
-                    )}
-                    {trip.status === "completed" && (
-                      <Button className="text-xs" disabled variant="outline">
-                        Completed
-                      </Button>
-                    )}
-                  </TimelineDescription>
-                </TimelineHeader>
-              </TimelineItem>
-              {/* {trip.stops &&
-                trip.stops.map((item, index) => (
-                  <TimelineItem key={index}>
-                    <TimelineConnector />
-                    <TimelineHeader>
-                      <TimelineIcon />
-                      <TimelineTitle>
-                        {item.stopLocation.displayName}
-                      </TimelineTitle>
-                      <TimelineDescription>
-                        <Button className="text-xs">Mark as completed</Button>
-                      </TimelineDescription>
-                    </TimelineHeader>
-                  </TimelineItem>
-                ))} */}
-              {/* {trip.stops &&
-                trip.stops.map((item, index) => {
-                  // Determine if the button should be enabled
-                  const isFirstStop = item.stopId === 1;
-                  const isPreviousArrived =
-                    index === 0 || trip.stops[index - 1].isArrived === true;
-
-                  const isButtonEnabled =
-                    (isFirstStop && trip.status === "on_going") ||
-                    (!isFirstStop && isPreviousArrived);
-
-                  return (
-                    <TimelineItem key={index}>
+      {loading ? (
+        <>
+          <Card className="w-[90%] md:w-[40%] p-1">
+            <CardHeader className="gap-y-1">
+              <CardTitle className="flex items-start justify-center">
+                <LoaderCircle className="animate-spin text-xl" />
+                Searching for trip...
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </>
+      ) : (
+        <>
+          {trip ? (
+            <>
+              <Card className="w-[90%] md:w-[40%] p-1">
+                <CardHeader className="gap-y-1">
+                  <CardTitle>
+                    Search result for trip id{" "}
+                    <span className="text-primary">{trip._id}</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Below timeline shows the exact location of the bus you
+                    booked right now.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Timeline>
+                    <TimelineItem>
                       <TimelineConnector />
                       <TimelineHeader>
                         <TimelineIcon />
                         <TimelineTitle>
-                          {item.stopLocation.displayName}
+                          {trip.startLocation.displayName}
                         </TimelineTitle>
                         <TimelineDescription>
-                          <Button
-                            className="text-xs"
-                            variant={isButtonEnabled ? "default" : "outline"}
-                            disabled={!isButtonEnabled}
-                          >
-                            Mark as completed
-                          </Button>
-                        </TimelineDescription>
-                      </TimelineHeader>
-                    </TimelineItem>
-                  );
-                })} */}
-              {trip.stops &&
-                trip.stops.map((item, index) => {
-                  // Determine if the button should be enabled
-                  const isFirstStop = item.stopId === 1;
-                  const isPreviousArrived =
-                    index === 0 || trip.stops[index - 1].isArrived === true;
-
-                  // Button should be enabled only if the stop is not marked as isArrived
-                  const isButtonEnabled =
-                    !item.isArrived &&
-                    ((isFirstStop && trip.status === "on_going") ||
-                      (!isFirstStop && isPreviousArrived));
-
-                  return (
-                    <TimelineItem key={index}>
-                      <TimelineConnector />
-                      <TimelineHeader>
-                        <TimelineIcon />
-                        <TimelineTitle>
-                          {item.stopLocation.displayName}
-                        </TimelineTitle>
-                        <TimelineDescription>
-                          {item.isArrived ? (
+                          {trip.status === "on_going" && (
                             <Button
                               className="text-xs"
-                              variant="outline"
                               disabled
+                              variant="outline"
                             >
                               Completed
                             </Button>
-                          ) : (
+                          )}
+                          {trip.status === "not_started" && (
                             <Button
                               className="text-xs"
-                              variant={isButtonEnabled ? "default" : "outline"}
-                              disabled={!isButtonEnabled}
-                              onClick={() =>
-                                updateTripStopStatus(item._id, trip._id, true)
-                              }
+                              variant="default"
+                              onClick={() => {
+                                updatedTripStatus(
+                                  "on_going",
+                                  trip._id,
+                                  trip.status
+                                );
+                              }}
                             >
-                              Mark as completed
+                              {patchLoading && trip._id === actionId ? (
+                                <>
+                                  <LoaderCircle className="animate-spin text-xl" />
+                                </>
+                              ) : (
+                                <>Start trip</>
+                              )}
+                            </Button>
+                          )}
+                          {trip.status === "completed" && (
+                            <Button
+                              className="text-xs"
+                              disabled
+                              variant="outline"
+                            >
+                              Completed
                             </Button>
                           )}
                         </TimelineDescription>
                       </TimelineHeader>
                     </TimelineItem>
-                  );
-                })}
-              <TimelineItem>
-                <TimelineHeader>
-                  <TimelineIcon />
-                  <TimelineTitle>{trip.endLocation.displayName}</TimelineTitle>
-                  <TimelineDescription>
-                    {trip.status === "on_going" &&
-                      trip.stops[trip.stops.length - 1].isArrived && (
-                        <Button
-                          variant="default"
-                          className="text-xs"
-                          onClick={() => {
-                            updatedTripStatus(
-                              "completed",
-                              trip._id,
-                              trip.status
-                            );
-                          }}
-                        >
-                          {patchLoading && trip._id === actionId ? (
-                            <>
-                              <LoaderCircle className="animate-spin text-xl" />
-                            </>
-                          ) : (
-                            <>Mark as trip completed</>
+                    {trip.stops &&
+                      trip.stops.map((item, index) => {
+                        const isFirstStop = item.stopId === 1;
+                        const isPreviousArrived =
+                          index === 0 ||
+                          trip.stops[index - 1].isArrived === true;
+
+                        const isButtonEnabled =
+                          !item.isArrived &&
+                          ((isFirstStop && trip.status === "on_going") ||
+                            (!isFirstStop && isPreviousArrived));
+
+                        return (
+                          <TimelineItem key={index}>
+                            <TimelineConnector />
+                            <TimelineHeader>
+                              <TimelineIcon />
+                              <TimelineTitle>
+                                {item.stopLocation.displayName}
+                              </TimelineTitle>
+                              <TimelineDescription>
+                                {item.isArrived ? (
+                                  <Button
+                                    className="text-xs"
+                                    variant="outline"
+                                    disabled
+                                  >
+                                    Completed
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    className="text-xs"
+                                    variant={
+                                      isButtonEnabled ? "default" : "outline"
+                                    }
+                                    disabled={!isButtonEnabled}
+                                    onClick={() =>
+                                      updateTripStopStatus(
+                                        item._id,
+                                        trip._id,
+                                        true
+                                      )
+                                    }
+                                  >
+                                    {patchStopLoading ? (
+                                      <>
+                                        <LoaderCircle className="animate-spin text-xl" />
+                                      </>
+                                    ) : (
+                                      <>Mark as completed</>
+                                    )}
+                                  </Button>
+                                )}
+                              </TimelineDescription>
+                            </TimelineHeader>
+                          </TimelineItem>
+                        );
+                      })}
+                    <TimelineItem>
+                      <TimelineHeader>
+                        <TimelineIcon />
+                        <TimelineTitle>
+                          {trip.endLocation.displayName}
+                        </TimelineTitle>
+                        <TimelineDescription>
+                          {trip.status === "on_going" &&
+                            trip.stops[trip.stops.length - 1].isArrived && (
+                              <Button
+                                variant="default"
+                                className="text-xs"
+                                onClick={() => {
+                                  updatedTripStatus(
+                                    "completed",
+                                    trip._id,
+                                    trip.status
+                                  );
+                                }}
+                              >
+                                {patchLoading && trip._id === actionId ? (
+                                  <>
+                                    <LoaderCircle className="animate-spin text-xl" />
+                                  </>
+                                ) : (
+                                  <>Mark as trip completed</>
+                                )}
+                              </Button>
+                            )}
+                          {!trip.stops[trip.stops.length - 1].isArrived && (
+                            <Button
+                              variant="outline"
+                              disabled
+                              className="text-xs"
+                            >
+                              Mark as trip completed
+                            </Button>
                           )}
-                        </Button>
-                      )}
-                    {!trip.stops[trip.stops.length - 1].isArrived && (
-                      <Button variant="outline" disabled className="text-xs">
-                        Mark as trip completed
-                      </Button>
-                    )}
-                    {trip.status === "completed" && (
-                      <Button variant="outline" disabled className="text-xs">
-                        Completed
-                      </Button>
-                    )}
-                  </TimelineDescription>
-                </TimelineHeader>
-              </TimelineItem>
-            </Timeline>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="w-[90%] md:w-[40%] p-4">
-          <CardHeader className="flex items-center justify-start gap-x-3 flex-row">
-            <CircleAlert size={30} className="text-primary" />
-            <div className="space-y-2">
-              <CardTitle>No data to show.</CardTitle>
-              <CardDescription>
-                Seems the trip is not found or something went wrong in our end.
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
+                          {trip.status === "completed" && (
+                            <Button
+                              variant="outline"
+                              disabled
+                              className="text-xs"
+                            >
+                              Completed
+                            </Button>
+                          )}
+                        </TimelineDescription>
+                      </TimelineHeader>
+                    </TimelineItem>
+                  </Timeline>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card className="w-[90%] md:w-[40%] p-4">
+                <CardHeader className="flex items-center justify-start gap-x-3 flex-row">
+                  <CircleAlert size={30} className="text-primary" />
+                  <div className="space-y-2">
+                    <CardTitle>No data to show.</CardTitle>
+                    <CardDescription>
+                      Seems the trip is not found or something went wrong in our
+                      end.
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            </>
+          )}
+        </>
       )}
     </div>
   );
