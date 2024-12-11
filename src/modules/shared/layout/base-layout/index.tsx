@@ -1,16 +1,10 @@
 import { Outlet } from "react-router-dom";
 import TopMenu from "../../navigation/top-menu";
+import { useAuth } from "@/context/AuthContext";
 
 const BaseLayout = () => {
-  const isAuthenticated = (() => {
-    try {
-      const storedValue = localStorage.getItem("isAuthenticated");
-      return storedValue ? JSON.parse(storedValue) : false;
-    } catch (error) {
-      console.error("Failed to parse isAuthenticated:", error);
-      return false;
-    }
-  })();
+  const { isAuthenticated } = useAuth();
+
   console.log(isAuthenticated, "isAuthed from base");
   return (
     <div className="flex w-full">

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import { useToast } from "@/hooks/use-toast";
 import { LoaderCircle } from "lucide-react";
@@ -39,6 +40,7 @@ function Login() {
   const userType = useAppSelector((state) => state.uiUpdates.authUserType);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { setAuthStatus } = useAuth();
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -61,7 +63,8 @@ function Login() {
       if (response) {
         const profile = await retriveUserProfile();
         if (profile) {
-          localStorage.setItem("isAuthenticated", "true");
+          localStorage.setItem("isAuthenticated", JSON.stringify(true));
+          setAuthStatus(true);
           localStorage.setItem("user", JSON.stringify(profile.data));
           if (profile.data.role === "passenger") {
             toast({

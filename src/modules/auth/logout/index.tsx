@@ -1,4 +1,5 @@
 import { logoutUser } from "@/api/api-services/authentication-service";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ const Logout = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user.role;
+  const { setAuthStatus } = useAuth();
 
   useEffect(() => {
     const postLogoutUser = async () => {
@@ -33,6 +35,7 @@ const Logout = () => {
         if (response) {
           localStorage.setItem("user", "");
           localStorage.setItem("isAuthenticated", "false");
+          setAuthStatus(false);
           navigate("/");
         } else {
           toast({
