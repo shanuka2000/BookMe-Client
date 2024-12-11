@@ -37,19 +37,6 @@ const Logout = () => {
           localStorage.setItem("isAuthenticated", "false");
           setAuthStatus(false);
           navigate("/");
-        } else {
-          toast({
-            title: "Uh oh! Something went wrong.",
-            description: "Redirecting back to home page.",
-            variant: "destructive",
-          });
-          if (role === "passenger") {
-            navigate("/client/search");
-          } else if (role === "driver") {
-            navigate("/driver/dashboard");
-          } else if (role === "admin") {
-            navigate("/driver/dashboard");
-          }
         }
       } catch (error: any) {
         toast({

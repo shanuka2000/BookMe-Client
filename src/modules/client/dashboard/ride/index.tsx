@@ -118,6 +118,9 @@ const Ride = () => {
         const fromLocation = await retriveSingleLocations(from as string);
         const toLocation = await retriveSingleLocations(to as string);
 
+        console.log(fromLocation, "From location");
+        console.log(toLocation, "To location");
+
         const locationsArr: Location[] = [];
         locationsArr.push(fromLocation.data),
           locationsArr.push(toLocation.data);
@@ -222,7 +225,7 @@ const Ride = () => {
                 <p>{bookingPayload?.seats}</p>
               </div>
               <div className="flex items-center justify-end">
-                <Button onClick={submitBooking}>
+                <Button onClick={submitBooking} disabled={bookingLoading}>
                   {bookingLoading ? "Confirming..." : "Confirm Booking"}
                 </Button>
               </div>
